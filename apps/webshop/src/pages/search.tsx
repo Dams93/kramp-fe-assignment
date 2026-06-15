@@ -4,6 +4,7 @@ import { groupBy } from '../utils/groupBy';
 import ProductCard from '../components/ProductCard';
 import styles from './search.module.css';
 import { SearchProductsResponse, SearchResult } from '../types';
+import { fetchGraphQL } from '../utils/fetchGraphQL';
 
 export default function SearchPage() {
   const router = useRouter();
@@ -13,16 +14,12 @@ export default function SearchPage() {
 
   useEffect(() => {
     const q = (router.query.q as string) || '';
-    const fetchProducts = async (): Promise<void> => {
+    const searchProducts = async (): Promise<void> => {
       try {
         setError(null);
         setIsLoading(true);
-
-        const response = await fetch('http://localhost:4000/graphql', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            query: `
+        const {searchProducts} = await fetchGraphQL<SearchProductsResponse>(
+          `
             query SearchProducts($q: String!) {
               searchProducts(query: $q) {
                 id
@@ -36,17 +33,10 @@ export default function SearchPage() {
               }
             }
           `,
-            variables: { q },
-          }),
-        });
+          { q },
+        );
 
-        if (!response.ok) {
-          throw new Error('Search request failed');
-        }
-
-        const data: SearchProductsResponse = await response.json();
-
-        setResults(data.data.searchProducts);
+        setResults(searchProducts);
       } catch (error) {
         console.error(error);
         setError('Something went wrong');
@@ -55,9 +45,8 @@ export default function SearchPage() {
       }
     };
 
-    fetchProducts();
+    searchProducts();
   }, [router.query.q]);
-
 
   const grouped = useMemo(() => groupBy(results, 'category'), [results]);
 
@@ -80,7 +69,7 @@ export default function SearchPage() {
           <section key={category} className={styles.category}>
             <h2 className={styles.categoryTitle}>{category}</h2>
             <div className={styles.grid}>
-              {grouped[category].map((product) => (
+              {grouped[category].map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>

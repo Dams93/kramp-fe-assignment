@@ -16,13 +16,27 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface Cart {
+  cart: CartItem[] | null;
+  addToCart: (item: CartItem) => void;
+  removeFromCart: (productId: string) => void;
+  clearCart: () => void;
+  totalItems: number;
+  totalPrice: number;
+}
+
 export type SearchResult = Product;
 
 export type SearchProductsResponse = {
-  data: {
-    searchProducts: SearchResult[];
-  };
+  searchProducts: SearchResult[];
 };
 
+export type GetProductsResponse = {
+  products: Product[];
+};
 
-export type ProductCategory = 'Tools' | 'Fasteners' | 'Safety Equipment' | 'Power Tools';
+export type ProductCategory =
+  | 'Tools'
+  | 'Fasteners'
+  | 'Safety Equipment'
+  | 'Power Tools';

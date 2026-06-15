@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { CartItem } from '../types';
+import { Cart, CartItem } from '../types';
 
-export function useCart() {
+export function useCart(): Cart {
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window === 'undefined') {
       return [];
@@ -16,9 +16,7 @@ export function useCart() {
     // Added missing dependency to avioid calling .setItem on every render
   }, [cart]);
 
-  const addToCart = (
-    item: CartItem,
-  ) => { 
+  const addToCart = (item: CartItem) => {
     setCart(prev => {
       const existing = prev.find(i => i.productId === item.productId);
       if (existing) {

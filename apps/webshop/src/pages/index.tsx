@@ -1,20 +1,25 @@
 import { GetServerSideProps } from 'next';
 import ProductCard from '../components/ProductCard';
 import styles from './index.module.css';
+import { GetProductsResponse, Product } from '../types';
+import { fetchGraphQL } from '../utils/fetchGraphQL';
 
-export const getServerSideProps: GetServerSideProps = async () => {
+interface HomePageProps {
+  featured: Product[];
+  timestamp: number;
+}
+
+export const getServerSideProps: GetServerSideProps<
+  HomePageProps
+> = async () => {
   const FEATURED_IDS = ['1', '4', '11', '17'];
-  const featured = [];
 
-  for (const id of FEATURED_IDS) {
+  const getProducts = async (ids: string[]): Promise<Product[]> => {
     try {
-      const res = await fetch('http://localhost:4000/graphql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: `
-            query GetProduct($id: ID!) {
-              product(id: $id) {
+      const { products } = await fetchGraphQL<GetProductsResponse>(
+        `
+            query GetProducts($ids: [ID!]!) {
+              products(ids: $ids) {
                 id
                 name
                 price
@@ -25,29 +30,25 @@ export const getServerSideProps: GetServerSideProps = async () => {
                 createdAt
               }
             }
-          `,
-          variables: { id },
-        }),
-      });
-      const data = await res.json();
-      if (data.data?.product) {
-        featured.push(data.data.product);
-      }
-    } catch (e) {}
-  }
+            `,
+        { ids },
+      );
+      console.log('Fetched featured products:', products);
+      return products;
+    } catch (e) {
+      console.error(`Failed to load featured products ${ids}`, e);
+      return [];
+    }
+  };
+  const featured = await getProducts(FEATURED_IDS);
 
   return {
     props: {
-      featured,
+      featured: featured,
       timestamp: Date.now(),
     },
   };
 };
-
-interface HomePageProps {
-  featured: any[];
-  timestamp: number;
-}
 
 export default function HomePage({ featured, timestamp }: HomePageProps) {
   return (
@@ -62,7 +63,8 @@ export default function HomePage({ featured, timestamp }: HomePageProps) {
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>Industrial supplies, delivered.</h1>
           <p className={styles.heroSubtitle}>
-            Tools, fasteners, safety equipment and power tools for professionals.
+            Tools, fasteners, safety equipment and power tools for
+            professionals.
           </p>
         </div>
       </section>
@@ -75,8 +77,8 @@ export default function HomePage({ featured, timestamp }: HomePageProps) {
           </p>
         </div>
         <div className={styles.grid}>
-          {featured.map((product, index) => (
-            <ProductCard key={index} product={product} />
+          {featured.map(product => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
@@ -84,11 +86,17 @@ export default function HomePage({ featured, timestamp }: HomePageProps) {
       <section className={styles.categories}>
         <h2>Shop by category</h2>
         <div className={styles.categoryGrid}>
-          {['Tools', 'Fasteners', 'Safety Equipment', 'Power Tools'].map((cat, index) => (
-            <a key={index} href={`/search?q=${cat}`} className={styles.categoryCard}>
-              {cat}
-            </a>
-          ))}
+          {['Tools', 'Fasteners', 'Safety Equipment', 'Power Tools'].map(
+            (cat, index) => (
+              <a
+                key={index}
+                href={`/search?q=${cat}`}
+                className={styles.categoryCard}
+              >
+                {cat}
+              </a>
+            ),
+          )}
         </div>
       </section>
     </div>

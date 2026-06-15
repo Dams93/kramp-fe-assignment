@@ -5,14 +5,15 @@ import { createContext } from 'react';
 import { useCart } from '../hooks/useCart';
 import { Header } from '../components/Header';
 import './styles.css';
+import { Cart } from '../types';
 
-export const CartContext = createContext<any>(null);
+export const CartContext = createContext<Cart>({} as Cart);
 
 function CustomApp({ Component, pageProps }: AppProps) {
   const cart = useCart();
 
   return (
-    <CartContext.Provider value={{ cart }}>
+    <CartContext.Provider value={cart}>
       <Head>
         <title>Kramp Webshop</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
