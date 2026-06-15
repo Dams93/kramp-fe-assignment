@@ -35,6 +35,10 @@ export type GetProductsResponse = {
   products: Product[];
 };
 
+export type GetProductResponse = {
+  product: Product;
+};
+
 export type ProductCategory =
   | 'Tools'
   | 'Fasteners'
