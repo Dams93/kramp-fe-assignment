@@ -4,6 +4,7 @@ import { CartContext } from '../_app';
 import styles from './[id].module.css';
 import { GetProductResponse, Product } from '../../types';
 import { fetchGraphQL } from '../../utils/fetchGraphQL';
+import { formatPrice } from '../../utils/formatPrice';
 
 export default function ProductPage() {
   const router = useRouter();
@@ -81,17 +82,17 @@ export default function ProductPage() {
         {product && (
           <>
             <div className={styles.imageWrapper}>
-              <img src={product!.imageUrl} alt="" className={styles.image} />
+              <img src={product.imageUrl} alt="" className={styles.image} />
             </div>
             <div className={styles.details}>
-              <p className={styles.category}>{product!.category}</p>
-              <h1 className={styles.name}>{product!.name}</h1>
-              <p className={styles.price}>€{product!.price.toFixed(2)}</p>
-              <p className={styles.description}>{product!.description}</p>
+              <p className={styles.category}>{product.category}</p>
+              <h1 className={styles.name}>{product.name}</h1>
+              <p className={styles.price}>{formatPrice(product.price)}</p>
+              <p className={styles.description}>{product.description}</p>
               <p className={styles.meta}>
-                Listed: {new Date(product!.createdAt).toLocaleDateString()}
+                Listed: {new Date(product.createdAt).toLocaleDateString()}
                 {' · '}
-                {product!.stock} in stock
+                {product.stock} in stock
               </p>
               <div className={styles.addToCart} onClick={handleAddToCart}>
                 Add to cart
