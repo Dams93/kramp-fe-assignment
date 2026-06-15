@@ -7,51 +7,55 @@ import { SearchDialog } from './SearchDialog';
 import { CartIcon } from './cartIcon';
 import { useDebounce } from '../hooks/useDebounce';
 import styles from './Header.module.css';
-
-var GRAPHQL_URL = 'http://localhost:4000/graphql';
+import { fetchGraphQL } from '../utils/fetchGraphQL';
+import { SearchProductsResponse, SearchResult } from '../types';
 
 export function Header() {
   const router = useRouter();
-  const { cart } = useContext(CartContext);
+  const cart = useContext(CartContext);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+
+  const debouncedQuery = useDebounce(query, 500);
 
   useEffect(() => {
     setIsOpen(results.length > 0);
   }, [results]);
 
   useEffect(() => {
-    if (!query) {
+    if (!debouncedQuery) {
       setResults([]);
       return;
     }
 
-    fetch(GRAPHQL_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `
-          query Search($q: String!) {
-            searchProducts(query: $q) {
-              id
-              name
-              price
-              imageUrl
-              description
-              stock
-              createdAt
-            }
-          }
-        `,
-        variables: { q: query },
-      }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        setResults(data.data.searchProducts.slice(0, 5));
-      });
-  }, [query]);
+    const searchProducts = async (): Promise<void> => {
+      try {
+        const { searchProducts } = await fetchGraphQL<SearchProductsResponse>(
+          `
+                query SearchProducts($q: String!) {
+                  searchProducts(query: $q) {
+                    id
+                    name
+                    price
+                    imageUrl
+                    category
+                    description
+                    stock
+                    createdAt
+                  }
+                }
+              `,
+          { q: debouncedQuery },
+        );
+
+        setResults(_.slice(searchProducts, 0, 5));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    searchProducts();
+  }, [debouncedQuery]);
 
   useEffect(() => {
     const handleOutsideClick = () => {
@@ -83,19 +87,27 @@ export function Header() {
         <nav className={styles.nav}>
           <Link
             href="/"
-            className={isActivePage('/') && router.pathname === '/' ? styles.activeLink : styles.navLink}
+            className={
+              isActivePage('/') && router.pathname === '/'
+                ? styles.activeLink
+                : styles.navLink
+            }
           >
             Home
           </Link>
           <Link
             href="/search"
-            className={isActivePage('/search') ? styles.activeLink : styles.navLink}
+            className={
+              isActivePage('/search') ? styles.activeLink : styles.navLink
+            }
           >
             Products
           </Link>
           <Link
             href="/checkout"
-            className={isActivePage('/checkout') ? styles.activeLink : styles.navLink}
+            className={
+              isActivePage('/checkout') ? styles.activeLink : styles.navLink
+            }
           >
             Checkout
           </Link>
@@ -112,7 +124,9 @@ export function Header() {
             onClick={e => e.stopPropagation()}
           />
           {truncatedQuery && query.length > 30 && (
-            <span className={styles.truncatedHint}>Searching: {truncatedQuery}…</span>
+            <span className={styles.truncatedHint}>
+              Searching: {truncatedQuery}…
+            </span>
           )}
           {isOpen && (
             <SearchDialog
