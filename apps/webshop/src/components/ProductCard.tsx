@@ -3,6 +3,7 @@ import styles from './ProductCard.module.css';
 import { Product } from '../types';
 import Link from 'next/link';
 import { formatPrice } from '../utils/formatPrice';
+import Image from 'next/image';
 
 interface ProductCardProps {
   product: Product;
@@ -12,7 +13,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   return (
     <div className={styles.card} data-testid="product-card">
-      <img
+      <Image
         src={product.imageUrl}
         alt={product.name}
         width="300"

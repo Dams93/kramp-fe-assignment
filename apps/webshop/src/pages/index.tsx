@@ -5,6 +5,7 @@ import { GetProductsResponse, Product } from '../types';
 import { fetchGraphQL } from '../utils/fetchGraphQL';
 import { CartContext } from './_app';
 import { useContext } from 'react';
+import Image from 'next/image';
 
 interface HomePageProps {
   featured: Product[];
@@ -58,7 +59,7 @@ export default function HomePage({ featured, timestamp }: HomePageProps) {
   return (
     <div>
       <section className={styles.hero}>
-        <img
+        <Image
           src="https://placehold.co/1200x800/e63329/ffffff?text=Kramp+Webshop"
           alt="Kramp — Your industrial supply partner"
           loading="lazy"
