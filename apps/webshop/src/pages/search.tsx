@@ -1,54 +1,65 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { groupBy } from '../utils/groupBy';
 import ProductCard from '../components/ProductCard';
 import styles from './search.module.css';
+import { SearchProductsResponse, SearchResult } from '../types';
 
 export default function SearchPage() {
   const router = useRouter();
-  const [results, setResults] = useState<any[]>([]);
-  const [filteredResults, setFilteredResults] = useState<any[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const q = (router.query.q as string) || '';
+    const fetchProducts = async (): Promise<void> => {
+      try {
+        setError(null);
+        setIsLoading(true);
 
-    setIsLoading(true);
-
-    fetch('http://localhost:4000/graphql', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `
-          query SearchProducts($q: String!) {
-            searchProducts(query: $q) {
-              id
-              name
-              price
-              imageUrl
-              category
-              description
-              stock
-              createdAt
+        const response = await fetch('http://localhost:4000/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: `
+            query SearchProducts($q: String!) {
+              searchProducts(query: $q) {
+                id
+                name
+                price
+                imageUrl
+                category
+                description
+                stock
+                createdAt
+              }
             }
-          }
-        `,
-        variables: { q },
-      }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log('search results:', data);
+          `,
+            variables: { q },
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Search request failed');
+        }
+
+        const data: SearchProductsResponse = await response.json();
+
         setResults(data.data.searchProducts);
+      } catch (error) {
+        console.error(error);
+        setError('Something went wrong');
+      } finally {
         setIsLoading(false);
-      });
-  }, []);
+      }
+    };
 
-  useEffect(() => {
-    setFilteredResults(results);
-  }, [results]);
+    fetchProducts();
+  }, [router.query.q]);
 
-  const grouped = groupBy(filteredResults, 'category');
+
+  const grouped = useMemo(() => groupBy(results, 'category'), [results]);
 
   return (
     <div className={styles.page}>
@@ -59,7 +70,9 @@ export default function SearchPage() {
 
         {isLoading && <p>Loading...</p>}
 
-        {!isLoading && !filteredResults.length && (
+        {!isLoading && error && <p className={styles.error}>{error}</p>}
+
+        {!isLoading && !error && !results.length && (
           <p className={styles.empty}>No products found.</p>
         )}
 
@@ -67,8 +80,8 @@ export default function SearchPage() {
           <section key={category} className={styles.category}>
             <h2 className={styles.categoryTitle}>{category}</h2>
             <div className={styles.grid}>
-              {grouped[category].map((product, index) => (
-                <ProductCard key={index} product={product} />
+              {grouped[category].map((product) => (
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           </section>

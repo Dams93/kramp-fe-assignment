@@ -16,6 +16,13 @@ export interface CartItem {
   quantity: number;
 }
 
-export type SearchResult = any;
+export type SearchResult = Product;
+
+export type SearchProductsResponse = {
+  data: {
+    searchProducts: SearchResult[];
+  };
+};
+
 
 export type ProductCategory = 'Tools' | 'Fasteners' | 'Safety Equipment' | 'Power Tools';
