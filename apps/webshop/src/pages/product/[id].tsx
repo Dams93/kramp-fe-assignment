@@ -85,6 +85,8 @@ export default function ProductPage() {
             <div className={styles.imageWrapper}>
               <Image
                 src={product.imageUrl}
+                width="600"
+                height="400"
                 alt={product.name}
                 className={styles.image}
               />

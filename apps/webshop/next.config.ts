@@ -6,7 +6,11 @@ const nextConfig: WithNxOptions = {
   nx: {},
   turbopack: {
     root: path.join(__dirname, '..', '..'),
-  }
+  },
+  images: {
+    domains: ['placehold.co'],
+    dangerouslyAllowSVG: true,
+  },
 };
 
 const plugins = [withNx];

@@ -63,6 +63,8 @@ export default function HomePage({ featured, timestamp }: HomePageProps) {
           src="https://placehold.co/1200x800/e63329/ffffff?text=Kramp+Webshop"
           alt="Kramp — Your industrial supply partner"
           loading="lazy"
+          width="1200"
+          height="800"
           className={styles.heroImage}
         />
         <div className={styles.heroContent}>

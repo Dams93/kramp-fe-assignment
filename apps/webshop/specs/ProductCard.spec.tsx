@@ -30,11 +30,13 @@ describe('ProductCard', () => {
 
   it('displays the correct price', () => {
     const { getByTestId } = render(<ProductCard product={mockProduct} />);
-    expect(getByTestId('product-price').innerHTML).toBe('€18.99');
+    expect(getByTestId('product-price').innerHTML).toBe('€&nbsp;18,99');
   });
 
   it('renders the product name', () => {
     const { getByTestId } = render(<ProductCard product={mockProduct} />);
-    expect(getByTestId('product-card').textContent).toContain('Heavy Duty Hammer');
+    expect(getByTestId('product-card').textContent).toContain(
+      'Heavy Duty Hammer',
+    );
   });
 });
