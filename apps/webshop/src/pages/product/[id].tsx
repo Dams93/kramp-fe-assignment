@@ -82,7 +82,11 @@ export default function ProductPage() {
         {product && (
           <>
             <div className={styles.imageWrapper}>
-              <img src={product.imageUrl} alt="" className={styles.image} />
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className={styles.image}
+              />
             </div>
             <div className={styles.details}>
               <p className={styles.category}>{product.category}</p>
@@ -94,9 +98,13 @@ export default function ProductPage() {
                 {' · '}
                 {product.stock} in stock
               </p>
-              <div className={styles.addToCart} onClick={handleAddToCart}>
+              <button
+                type="button"
+                className={styles.addToCart}
+                onClick={handleAddToCart}
+              >
                 Add to cart
-              </div>
+              </button>
             </div>
           </>
         )}

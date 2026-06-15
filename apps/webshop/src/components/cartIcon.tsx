@@ -19,14 +19,9 @@ export function CartIcon({ count }: CartIconProps) {
   }, [count]);
 
   return (
-    <div
-      onClick={() => router.push('/checkout')}
-      className={styles.cartIcon}
-    >
+    <div onClick={() => router.push('/checkout')} className={styles.cartIcon}>
       <span className={styles.label}>{label}</span>
-      {count > 0 && (
-        <span className={styles.badge}>{count}</span>
-      )}
+      {count > 0 && <span className={styles.badge}>{count}</span>}
     </div>
   );
 }

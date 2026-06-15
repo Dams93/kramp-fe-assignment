@@ -1,16 +1,18 @@
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { groupBy } from '../utils/groupBy';
 import ProductCard from '../components/ProductCard';
 import styles from './search.module.css';
 import { SearchProductsResponse, SearchResult } from '../types';
 import { fetchGraphQL } from '../utils/fetchGraphQL';
+import { CartContext } from './_app';
 
 export default function SearchPage() {
   const router = useRouter();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const cart = useContext(CartContext);
 
   useEffect(() => {
     const q = (router.query.q as string) || '';
@@ -18,7 +20,7 @@ export default function SearchPage() {
       try {
         setError(null);
         setIsLoading(true);
-        const {searchProducts} = await fetchGraphQL<SearchProductsResponse>(
+        const { searchProducts } = await fetchGraphQL<SearchProductsResponse>(
           `
             query SearchProducts($q: String!) {
               searchProducts(query: $q) {
@@ -70,7 +72,18 @@ export default function SearchPage() {
             <h2 className={styles.categoryTitle}>{category}</h2>
             <div className={styles.grid}>
               {grouped[category].map(product => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={() =>
+                    cart.addToCart({
+                      productId: product.id,
+                      quantity: 1,
+                      name: product.name,
+                      price: product.price,
+                    })
+                  }
+                />
               ))}
             </div>
           </section>

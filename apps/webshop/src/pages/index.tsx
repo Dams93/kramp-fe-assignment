@@ -3,6 +3,8 @@ import ProductCard from '../components/ProductCard';
 import styles from './index.module.css';
 import { GetProductsResponse, Product } from '../types';
 import { fetchGraphQL } from '../utils/fetchGraphQL';
+import { CartContext } from './_app';
+import { useContext } from 'react';
 
 interface HomePageProps {
   featured: Product[];
@@ -51,6 +53,8 @@ export const getServerSideProps: GetServerSideProps<
 };
 
 export default function HomePage({ featured, timestamp }: HomePageProps) {
+  const cart = useContext(CartContext);
+
   return (
     <div>
       <section className={styles.hero}>
@@ -78,7 +82,18 @@ export default function HomePage({ featured, timestamp }: HomePageProps) {
         </div>
         <div className={styles.grid}>
           {featured.map(product => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddToCart={() =>
+                cart.addToCart({
+                  productId: product.id,
+                  quantity: 1,
+                  name: product.name,
+                  price: product.price,
+                })
+              }
+            />
           ))}
         </div>
       </section>
