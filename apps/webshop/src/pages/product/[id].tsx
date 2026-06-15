@@ -5,6 +5,7 @@ import styles from './[id].module.css';
 import { GetProductResponse, Product } from '../../types';
 import { fetchGraphQL } from '../../utils/fetchGraphQL';
 import { formatPrice } from '../../utils/formatPrice';
+import Image from 'next/image';
 
 export default function ProductPage() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function ProductPage() {
         {product && (
           <>
             <div className={styles.imageWrapper}>
-              <img
+              <Image
                 src={product.imageUrl}
                 alt={product.name}
                 className={styles.image}
