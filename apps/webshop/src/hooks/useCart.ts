@@ -1,36 +1,31 @@
 import { useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { CartItem } from '../types';
 
-const stored: CartItem[] =
-  typeof window !== 'undefined'
-    ? JSON.parse(localStorage.getItem('cart') || '[]')
-    : [];
-
 export function useCart() {
-  const [cart, setCart] = useState<CartItem[]>(stored);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
-
-  useEffect(() => {
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    setTotalPrice(total);
-  }, [cart]);
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+    return JSON.parse(localStorage.getItem('cart') || '[]');
+  });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('cart', JSON.stringify(cart));
     }
-  });
+    // Added missing dependency to avioid calling .setItem on every render
+  }, [cart]);
 
-  const addToCart = (item: Omit<CartItem, 'productId'> & { productId: string }) => {
-    const id = uuidv4();
-    console.log('adding to cart, entry id:', id);
-
+  const addToCart = (
+    item: CartItem,
+  ) => { 
     setCart(prev => {
       const existing = prev.find(i => i.productId === item.productId);
       if (existing) {
         return prev.map(i =>
-          i.productId === item.productId ? { ...i, quantity: i.quantity + 1 } : i
+          i.productId === item.productId
+            ? { ...i, quantity: i.quantity + 1 }
+            : i,
         );
       }
       return [...prev, { ...item }];
@@ -44,6 +39,12 @@ export function useCart() {
   const clearCart = () => {
     setCart([]);
   };
+
+  // No need to store totalPrice in state, can be derived from cart items
+  const totalPrice = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
